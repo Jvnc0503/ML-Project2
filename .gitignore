@@ -1,4 +1,13 @@
-/.venv
-/.env
-/.conda
+# Environment folders
+.venv/
+.env/
+.conda/
+__pycache__/
+
+# IDE folders
+.vscode/
+.idea/
+
+# Specific files
 ml-25m.zip
+archive.zip
