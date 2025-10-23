@@ -9,5 +9,6 @@ __pycache__/
 .idea/
 
 # Specific files
-ml-25m.zip
-archive.zip
+ml-25m/
+SampleMoviePosters/
+MovieGenre.csv
