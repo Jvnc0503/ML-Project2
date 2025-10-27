@@ -11,3 +11,4 @@ __pycache__/
 # Specific files
 ml-25m/
 SampleMoviePosters/
+.env
