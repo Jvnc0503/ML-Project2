@@ -12,3 +12,4 @@ __pycache__/
 ml-25m/
 SampleMoviePosters/
 .env
+posters/
