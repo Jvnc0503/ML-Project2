@@ -8,9 +8,13 @@ __pycache__/
 .vscode/
 .idea/
 
+# Compressed files
+*.zip
+*.7z
+*.tar.gz
+
 # Specific files
 ml-25m/
 SampleMoviePosters/
 .env
 posters/
-posters.7z
