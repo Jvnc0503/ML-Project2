@@ -1,29 +1,22 @@
 \documentclass[stu,12pt,floatsintext]{IEEEtran}
 
-% -------------------------------
-% Paquetes recomendados por IEEE
-% -------------------------------
-\usepackage[utf8]{inputenc}   % codificación de caracteres
-\usepackage[T1]{fontenc}      % codificación de fuentes
-\usepackage[spanish]{babel}   % idioma español
-\usepackage{cite}             % estilo de citas IEEE
-\usepackage{amsmath,amssymb}  % matemáticas
-\usepackage{graphicx}         % insertar imágenes
-\usepackage{array}            % tablas avanzadas
-\usepackage{url}              % URLs
-\usepackage{hyperref}         % hipervínculos en PDF
-\usepackage{booktabs}         % tablas elegantes
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{booktabs}
 \usepackage{newunicodechar}
 \newunicodechar{⁽}{^{(}}
-% -------------------------------
-% Inicio del documento
-% -------------------------------
 \begin{document}
 
 % Título
 \title{Proyecto 2: Clustering}
 
-% Autores con porcentaje de participación
 \author{
     Jesús Valentín Niño Castañeda, 
     Sebastian Hernandez Miñano,
@@ -35,9 +28,6 @@
 
 \maketitle
 
-% -------------------------------
-% Resumen y palabras clave
-% -------------------------------
 \begin{abstract}
 Este proyecto desarrolla un sistema de recomendación de películas mediante clustering no supervisado aplicado a características visuales de pósters cinematográficos. Se extrajeron descriptores de color, textura y forma de 9,337 pósters del dataset MovieLens, seguido de reducción de dimensionalidad con PCA, SVD y LDA.
 \end{abstract}
@@ -46,9 +36,6 @@ Este proyecto desarrolla un sistema de recomendación de películas mediante clu
 Clustering, Reducción de dimensionalidad, Computer Vision, Sistemas de recomendación, Movie posters, Aprendizaje no supervisado
 \end{IEEEkeywords}
 
-% -------------------------------
-% Parte teórica (tu contenido)
-% -------------------------------
 \section{Introducción}
 
 Los sistemas de recomendación son herramientas fundamentales en la era digital, permitiendo a los usuarios descubrir contenido relevante dentro de vastas bibliotecas multimedia. En el contexto cinematográfico, los métodos tradicionales se basan principalmente en información textual como géneros, directores, actores y reseñas de usuarios. Sin embargo, los pósters de películas constituyen una fuente rica de información visual que comunica elementos estéticos, temáticos y emocionales, características que influyen significativamente en las preferencias del espectador. Este proyecto explora un enfoque alternativo basado en técnicas de computer vision y clustering no supervisado para analizar y agrupar películas según la similitud visual de sus pósters, ofreciendo recomendaciones fundamentadas en características perceptuales en lugar de metadatos convencionales.
@@ -270,12 +257,12 @@ La experimentación siguió el orden de los cuadernos y produjo los siguientes a
         	oprule
         Archivo & Contenido \\
         \midrule
-        	exttt{data/features.npz} & Matriz de características concatenadas + movieId \\
-        	exttt{data/features\_pca.npz} & Proyección PCA (64) + movieId \\
-        	exttt{data/features\_svd.npz} & Proyección SVD (64) + movieId \\
-        	exttt{data/features\_lda.npz} & Proyección LDA + movieId filtrados \\
-        	exttt{models/kmeans\_*.pkl} & Modelos K\nobreakdash-means finales (PCA/SVD/LDA) \\
-        	exttt{models/gmm\_*.pkl} & Modelos GMM finales (PCA/SVD/LDA) \\
+        	data/features.npz & Matriz de movieId y array de features \\
+        	data/features\_pca.npz & Proyección PCA (64) + movieId \\
+        	data/features\_svd.npz & Proyección SVD (64) + movieId \\
+        	data/features\_lda.npz & Proyección LDA + movieId filtrados \\
+        	models/kmeans\_*.pkl & Modelos K\nobreakdash-means finales (PCA/SVD/LDA) \\
+        	models/gmm\_*.pkl & Modelos GMM finales (PCA/SVD/LDA) \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -288,7 +275,6 @@ En K\nobreakdash-means, la métrica Silhouette condujo a valores de $k$ razonabl
 \section{Conclusiones}
  
 \section{Contribution Statement}
-% Aquí debes detallar la contribución de cada miembro. Ejemplo:
 \begin{itemize}
     \item \textbf{Jesús Valentín Niño Castañeda (100\%):} Preprocesamiento del dataset (unión de ids), descargar de posters, extracción de características, reducción de dimensionalidad, desarrollo de modelos de clustering .
     \item \textbf{Sebastian Hernandez Miñano (100\%):} Resolución de la parte teórica y preparación del Dataset .

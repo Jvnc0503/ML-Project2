@@ -17,6 +17,9 @@ __pycache__/
 # Latex files
 *.aux
 *.fdb_latexmk
+*.log
+*.out
+*.dvi
 
 # Specific files
 ml-25m/
