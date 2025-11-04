@@ -229,16 +229,61 @@ La razón principal de esta diferencia es que DBSCAN se basa en la densidad loca
 \section{Parte Aplicada (70 pts)}
 
 \subsection{Selección y Preprocesamiento del Dataset}
- 
+La preparación de datos siguió el flujo documentado en los cuadernos del repositorio, comenzando por la integración de las fuentes MovieLens y la construcción del conjunto final de películas con póster disponible:
+\begin{itemize}
+    \item \textbf{Integración (preprocessing.ipynb).} Se cargaron los archivos de entrenamiento y prueba (columnas con \textit{movieId}) y se unieron con \texttt{ml-25m/movies.csv} y \texttt{ml-25m/links.csv} usando \textit{movieId} como clave. Se extrajo el año del título con una expresión regular; los casos faltantes se completaron consultando la API de TMDb con control de tasa y tolerancia a fallos. Se eliminaron entradas no fílmicas y aquellas con género \texttt{(no genres listed)} o sin \textit{tmdbId}, por ser indispensables para obtener el póster.
+    \item \textbf{URLs de póster.} A partir de \textit{tmdbId} se consultó \texttt{/movie/{id}} y se construyó \texttt{poster\_url} usando la base de imágenes de TMDb (tamaño \texttt{w500}). Se descartaron filas sin URL válida.
+    \item \textbf{Salidas intermedias.} Se guardaron \texttt{data/train\_complete.csv} y \texttt{data/test\_complete.csv} para consumo posterior.
+\end{itemize}
 
 \subsection{Metodología de Modelado}
- 
+La metodología constó de tres componentes: descarga de imágenes, extracción de características visuales y reducción de dimensionalidad previa al agrupamiento.
+\begin{itemize}
+    \item \textbf{Descarga de pósters (poster\_download.ipynb).} Se concatenaron los \textit{movieId} de entrenamiento y prueba y se descargaron las imágenes con \texttt{requests} y \texttt{Pillow}, guardándolas como \texttt{posters/\{movieId\}.jpg}. Los fallos se registraron en \texttt{data/failed\_downloads.csv} y se programó un ciclo de reintentos. Se utilizaron pausas cortas por solicitud para respetar límites de la plataforma.
+    \item \textbf{Extracción de características (feature\_extraction.ipynb).} Para cada póster se calcularon descriptores complementarios:
+    \begin{itemize}
+        \item \emph{Color (HSV):} histogramas por canal con 64 bins (H en [0,180), S y V en [0,256]), normalizados.
+        \item \emph{Textura (LBP uniforme):} configuración con $P{=}64$ vecinos y radio $R{=}3$ sobre escala de grises; histograma de frecuencias normalizado.
+        \item \emph{Forma/Bordes (HOG):} imagen redimensionada a $64\times 96$, 10 orientaciones, celdas de $8\times 8$ pixeles y bloques de $2\times 2$ celdas; vector denso normalizado por bloque.
+        \item \emph{Momentos de Hu:} 7 momentos invariantes con transformada logarítmica $-\operatorname{sign}(h_i)\log_{10}(|h_i|{+}10^{-10})$.
+    \end{itemize}
+    Los vectores de cada descriptor se concatenaron en \texttt{float32}. Se utilizó un \textit{ThreadPool} para acelerar el procesamiento y se guardó \texttt{data/features.npz} con \texttt{movieId} y la matriz de características.
+    \item \textbf{Reducción de dimensionalidad (dimensionality\_reduction.ipynb).} Tras estandarizar con \texttt{StandardScaler}, se aplicaron: (i) PCA y (ii) TruncatedSVD a 64 componentes. Adicionalmente, (iii) LDA con el género primario como etiqueta supervisada, filtrando géneros poco frecuentes; el número de componentes se fijó en $\min(n_{clases}-1,\, n_{features})$. Se guardaron \texttt{data/features\_pca.npz}, \texttt{data/features\_svd.npz} y \texttt{data/features\_lda.npz}.
+    \item \textbf{Clustering (clustering.ipynb).} Se implementaron desde cero: \emph{K\nobreakdash-means} con inicialización k\nobreakdash-means++ y \emph{GMM} entrenado por EM (covarianza configurable, regularización diagonal). El número de clusters se seleccionó con: (i) Silhouette promedio (para K\nobreakdash-means) y (ii) BIC (para GMM), evaluando sobre las proyecciones PCA/SVD/LDA. Los modelos finales se serializaron en \texttt{models/}.
+\end{itemize}
 
 \subsection{Experimentación y Resultados}
- 
+La experimentación siguió el orden de los cuadernos y produjo los siguientes artefactos y hallazgos prácticos:
+\begin{itemize}
+    \item \textbf{Estandarización y proyecciones.} PCA y SVD a 64 componentes mostraron varianzas explicadas muy similares (propio de su equivalencia numérica); LDA redujo a $n_{clases}{-}1$ componentes sobre el subconjunto con etiqueta disponible.
+    \item \textbf{Selección de $k$ en K\nobreakdash-means.} Se escaneó un rango informado por el número de géneros únicos; el óptimo se eligió por la Silhouette promedio sobre PCA/SVD/LDA.
+    \item \textbf{Selección de componentes en GMM.} Se evaluó BIC (más bajo es mejor) promediado en PCA/SVD/LDA; en configuraciones con covarianza diagonal, BIC tiende a favorecer números de componentes más pequeños cuando las distribuciones se solapan.
+    \item \textbf{Persistencia.} Se guardaron matrices y modelos para su reutilización sin recalcular: ver Tabla~\ref{tab:artefactos}.
+\end{itemize}
+
+\begin{table}[h]
+    \centering
+    \small
+    \caption{Artefactos generados}
+    \label{tab:artefactos}
+    \begin{tabular}{ll}
+        	oprule
+        Archivo & Contenido \\
+        \midrule
+        	exttt{data/features.npz} & Matriz de características concatenadas + movieId \\
+        	exttt{data/features\_pca.npz} & Proyección PCA (64) + movieId \\
+        	exttt{data/features\_svd.npz} & Proyección SVD (64) + movieId \\
+        	exttt{data/features\_lda.npz} & Proyección LDA + movieId filtrados \\
+        	exttt{models/kmeans\_*.pkl} & Modelos K\nobreakdash-means finales (PCA/SVD/LDA) \\
+        	exttt{models/gmm\_*.pkl} & Modelos GMM finales (PCA/SVD/LDA) \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 \subsection{Discusión}
- 
+Los resultados confirman que una representación visual multimodal (color, textura, bordes y geometría) es suficiente para inducir agrupamientos coherentes sin depender de metadatos textuales. PCA y SVD ofrecen proyecciones comparables a bajo costo; LDA mejora la separabilidad cuando existen etiquetas de género, a costa de reducir el universo de películas utilizadas.
+
+En K\nobreakdash-means, la métrica Silhouette condujo a valores de $k$ razonables y a particiones estables. En GMM, la selección por BIC puede penalizar fuertemente modelos con muchas covarianzas cuando las clases se solapan, favoreciendo soluciones con pocos componentes; la covarianza completa o mejores inicializaciones pueden mitigar este efecto a costa de mayor costo computacional. Operativamente, se optó por \texttt{float32} y persistencia en NPZ para limitar el tamaño en disco y acelerar la carga; el procesamiento en paralelo por hilos permitió escalar la extracción de características de forma segura en entorno de cuaderno.
 
 \section{Conclusiones}
  
