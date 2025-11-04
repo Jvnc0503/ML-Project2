@@ -20,6 +20,7 @@ __pycache__/
 *.log
 *.out
 *.dvi
+*.fls
 
 # Specific files
 ml-25m/
