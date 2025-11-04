@@ -12,6 +12,11 @@ __pycache__/
 *.zip
 *.7z
 *.tar.gz
+*.gz
+
+# Latex files
+*.aux
+*.fdb_latexmk
 
 # Specific files
 ml-25m/
